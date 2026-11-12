@@ -136,14 +136,17 @@
 *(Xem trực tiếp mã nguồn trong thư mục `prototype/index.html`)*
 
 * **Vị trí [1] — Huy hiệu minh bạch hệ thống (PAIR / G1, G2):**
-  * Hiển thị: *"Trợ lý ảo đặt chỗ Traveloka · Tự động giữ chỗ trong 20 phút · Không tự ý đổi vé khi chưa có xác nhận"*. Người dùng biết ngay năng lực và giới hạn của AI.
-* **Vị trí [2] — Thẻ chuyến bay kèm đếm ngược (HAX G11, G10):**
-  * Hiển thị rõ: Chuyến gốc BM 213 (ĐÃ HUỶ DO BÃO) $\rightarrow$ Đề xuất chuyến thay thế BM 201 (07:00 ngày 13/11).
-  * Bộ đếm lùi: `Giữ chỗ còn lại: 19:45`.
-* **Vị trí [3] — Cơ chế xác nhận & Hoàn tác (HAX G8, G9 / PAIR Control):**
-  * Nút bấm chính: `[Xác nhận đổi vé miễn phí]` (Đòi hỏi người dùng chủ động duyệt - Human in the loop).
-  * Nút phụ: `[Huỷ giữ chỗ]` (Gạt bỏ đề xuất dễ dàng theo G8).
-  * Nút khẩn cấp: `[Chuyển gặp nhân viên hỗ trợ]` (Đường lui an toàn theo PAIR Graceful Failure).
+  * Hiển thị: *"Trợ lý ảo đặt chỗ Traveloka · Tự động giữ chỗ trong 20 phút · Cần duyệt khi đổi vé"*. Người dùng nắm rõ năng lực và giới hạn của AI ngay từ đầu.
+* **Vị trí [2] — Minh bạch căn cứ & Nguồn sự thật (PAIR Explainability):**
+  * Dẫn chứng dữ liệu từ mã `TRV-7Q2K` và thông báo bão của hãng Bay Mẫu; giải thích lý do từ chối chuyến tối BM 217 (chỉ còn 1 chỗ không đủ cho 2 khách An & bé Bình).
+* **Vị trí [3] — Mức TỰ LÀM: `giu_cho_chuyen_moi` (HAX G2, G10):**
+  * Thẻ chuyến bay tự động khoá 2 ghế BM 201 kèm đồng hồ đếm ngược `20:00` thời gian thực (TTL auto-release).
+* **Vị trí [4] — Mức CẦN NGƯỜI DUYỆT: `doi_chuyen_bay` (HAX Control / Human-in-the-loop):**
+  * Nút bấm xác nhận màu xanh 1 chạm — Hành khách bắt buộc phải chủ động bấm duyệt để kích hoạt lần đổi miễn phí duy nhất. Kèm nút hoàn tác khẩn cấp 5 phút.
+* **Vị trí [5] — Mức CẤM TỰ ĐỘNG: `gui_yeu_cau_hoan_ve` (PAIR Graceful Failure):**
+  * Nút hoàn vé viền đỏ kích hoạt Popup Modal cam kết 2 bước (bắt tích cam kết hiểu rõ tiền về sau 30-90 ngày và không thể huỷ), triệt tiêu hoàn toàn nguy cơ mất vé do AI gọi nhầm khi khách đang giận dữ.
+* **Vị trí [6] — Cơ chế hoàn tác & Thoát khẩn cấp (HAX G8, G9):**
+  * Nút `[Huỷ giữ chỗ]` (gạt bỏ đề xuất dễ dàng) và nút `[Chuyển gặp nhân viên]` (đường lui an toàn kèm ETA 2 phút).
 
 ---
 
