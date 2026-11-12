@@ -80,8 +80,10 @@
      * Lựa chọn A (Khuyên dùng): `[Giữ chỗ miễn phí sáng mai]` (Nổi bật).
      * Lựa chọn B: `[Tôi hiểu, tiếp tục gửi yêu cầu hoàn tiền]` (Nút viền xám mờ).
 3. **Người dùng làm gì tiếp:** Nếu vô tình bấm trong lúc nóng giận, khách vẫn có đường lui an toàn. Nếu thực sự muốn hoàn tiền, khi bấm nút B, hệ thống sẽ bật Popup Modal bắt tích chọn cam kết trước khi mở form.
-4. **Loại lỗi:** **Lỗi người dùng / Lỗi nhận thức (User Emotional Bias)** — Khách buông lời tiêu cực do bức xúc nhất thời. Thiết kế phải tạo "ma sát tích cực" (Friction) để ngăn chặn hành động không thể cứu vãn.
-5. **Lỗi sửa câu chữ KHÔNG CỨU ĐƯỢC:** Lỗi gọi tool `gui_yeu_cau_hoan_ve`. Dù câu trả lời của AI có khéo léo đến đâu, nếu backend cho phép AI tự động kích hoạt API hoàn vé qua NLP intent thì khách hàng sẽ mất vé ngay lập tức. Thiết kế cứu nó bằng cách: **Hạ quyền tự chủ của tool `gui_yeu_cau_hoan_ve` xuống mức CẤM tự động**, bắt buộc phải có sự xác nhận chủ động 2 bước từ UI của người dùng.
+4. **Ai được báo & sau bao lâu:** Nếu khách bấm nút xác nhận gửi yêu cầu hoàn tiền $\rightarrow$ Hệ thống lập tức bắn ticket kèm tag `URGENT_REFUND_WEATHER` sang hệ thống CSKH trong vòng 10 giây, đồng thời gửi email thông báo mã tra cứu hoàn tiền cho khách. Nếu khách không bấm gì $\rightarrow$ Không gửi báo cáo, giải phóng log cảnh báo sau 24h.
+5. **Quyết định UX:** Chọn giải thích kèm cảnh báo rủi ro không thể đảo ngược (Friction on irreversible action) và tạo đường lui an toàn. Đã loại phương án: Tự động gửi hoàn vé theo yêu cầu chat (quá nguy hiểm, vi phạm chính sách) và loại phương án: Từ chối hoàn vé (xâm phạm quyền lợi hợp pháp của khách).
+6. **Loại lỗi:** **Lỗi người dùng / Lỗi nhận thức (User Emotional Bias)** — Khách buông lời tiêu cực do bức xúc nhất thời. Thiết kế phải tạo "ma sát tích cực" (Friction) để ngăn chặn hành động không thể cứu vãn.
+7. **Lỗi sửa câu chữ KHÔNG CỨU ĐƯỢC:** Lỗi gọi tool `gui_yeu_cau_hoan_ve`. Dù câu trả lời của AI có khéo léo đến đâu, nếu backend cho phép AI tự động kích hoạt API hoàn vé qua NLP intent thì khách hàng sẽ mất vé ngay lập tức. Thiết kế cứu nó bằng cách: **Hạ quyền tự chủ của tool `gui_yeu_cau_hoan_ve` xuống mức CẤM tự động**, bắt buộc phải có sự xác nhận chủ động 2 bước từ UI của người dùng.
 
 ---
 
@@ -113,12 +115,21 @@
 2. **Trên K2 (Khách cáu đòi hoàn tiền):** AI **bị cấm tự gọi `gui_yeu_cau_hoan_ve`** $\rightarrow$ AI giải thích chính sách và đưa cảnh báo $\rightarrow$ Lỗi mất vé không thể xảy ra.
 3. **Trên kịch bản bình thường (*"Đổi giúp mình sang 07:00 sáng mai"*):** AI tự giữ chỗ trong 1 giây $\rightarrow$ hiển thị thẻ tóm tắt chuyến bay kèm nút bấm `[Xác nhận]` $\rightarrow$ khách bấm 1 chạm là xong trong 5 giây. Khách bình thường không hề phải chờ đợi tổng đài viên vô ích.
 
+### Thay đổi lời hứa thương hiệu (Brand Promise):
+* **Lời hứa cũ (Tự chủ tối đa):** *"AI tự động giải quyết mọi thủ tục đổi và hoàn vé thay bạn."* $\rightarrow$ Lời hứa này nguy hiểm vì khiến khách hàng lầm tưởng AI sẽ tự động hoàn tiền hoặc tự ý đổi chuyến mà không cần họ duyệt, dẫn đến nguy cơ khiếu nại, kiện tụng khi AI chọn sai.
+* **Lời hứa mới (Tự chủ có kiểm soát):** *"Trợ lý AI tốc độ cao: Tự động giữ chỗ trong 20 phút bảo vệ vé cho bạn — Bạn toàn quyền kiểm tra và bấm xác nhận cuối cùng."*
+
 ---
 
 ## §5. Prototype (Chặng 5)
 
 * **Công cụ xây dựng:** HTML5 / CSS3 / Vanilla JS tương tác thời gian thực (chạy trực tiếp trên trình duyệt).
 * **Mô phỏng:** Tích hợp bộ đếm lùi thời gian thực 20:00 của `giu_cho_chuyen_moi`, tính năng chuyển đổi 3 cấp tự chủ trực quan và nút Hoàn tác/Huỷ giữ chỗ khẩn cấp.
+
+### Quyết định thiết kế giao diện (UI/UX Decisions):
+* **Đã chọn:** Giao diện Thẻ hành động tương tác (Interactive Action Cards) kết hợp đồng hồ đếm ngược (Countdown Timer) và nút duyệt 1 chạm.
+* **Đã cân nhắc & loại bỏ:** Chatbot thuần văn bản (Text-only conversational UI). 
+  * *Lý do loại bỏ:* Trong bối cảnh chuyến bay bị huỷ khẩn cấp, khách hàng đang lo lắng và vội vã. Bắt khách đọc các đoạn văn dài giải thích chính sách làm tăng gánh nặng nhận thức (cognitive overload), dễ gây hiểu lầm hoặc bấm nhầm lệnh không đảo ngược được. Dạng thẻ trực quan giúp khách nhìn thấy ngay thời gian giữ chỗ còn lại, số ghế trống và các nút bấm an toàn.
 
 ### Ảnh chụp Prototype và Đối chiếu Nguyên tắc HAX / PAIR:
 
