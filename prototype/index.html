@@ -71,18 +71,35 @@
       gap: 28px;
       padding: 20px 28px 40px;
       max-width: 1380px;
+      transition: all 0.3s;
+    }
+
+    /* CHẾ ĐỘ XEM ĐỘC LẬP MÀN HÌNH ĐIỆN THOẠI (DESIGN MÀN RIÊNG) */
+    body.mobile-only main {
+      display: flex;
+      justify-content: center;
+      padding: 24px 10px;
+    }
+    body.mobile-only aside {
+      display: none;
+    }
+    body.mobile-only .n {
+      display: none; /* Ẩn số đánh dấu rubric khi chỉ xem app thuần túy */
     }
     
     /* Phone frame */
     .phone {
+      position: relative;
       background: #fff;
-      border: 1px solid var(--line);
+      border: 1.5px solid #cbd5e1;
       border-radius: 36px;
       padding: 16px;
-      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.08), 0 8px 10px -6px rgba(0, 0, 0, 0.04);
+      box-shadow: 0 14px 30px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.04);
       display: flex;
       flex-direction: column;
       height: 720px;
+      width: 430px;
+      overflow: hidden;
     }
     .bar {
       display: flex;
@@ -111,6 +128,34 @@
       margin-bottom: 4px;
     }
     
+    /* In-App Toast Notification (Thay thế hoàn toàn Browser Alert của Edge) */
+    .phone-toast {
+      position: absolute;
+      top: 52px;
+      left: 16px;
+      right: 16px;
+      background: #0f172a;
+      color: #fff;
+      padding: 10px 14px;
+      border-radius: 12px;
+      font-size: 13px;
+      box-shadow: 0 10px 20px -3px rgba(0,0,0,0.25);
+      display: none;
+      align-items: center;
+      gap: 10px;
+      z-index: 50;
+      animation: toastSlideDown 0.25s ease-out;
+    }
+    .phone-toast.show { display: flex; }
+    .phone-toast.success { background: #065f46; border: 1px solid #10b981; }
+    .phone-toast.warning { background: #854d0e; border: 1px solid #eab308; }
+    .phone-toast.info { background: #1e293b; border: 1px solid #475569; }
+    
+    @keyframes toastSlideDown {
+      from { transform: translateY(-20px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+
     .chat-scroll {
       flex: 1;
       overflow-y: auto;
@@ -328,42 +373,48 @@
       line-height: 1.45;
     }
     
-    /* Modal 2-Step */
+    /* Modal 2-Step In-App */
     .modal-overlay {
-      position: fixed;
+      position: absolute;
       inset: 0;
-      background: rgba(15, 23, 42, 0.6);
+      background: rgba(15, 23, 42, 0.7);
       display: none;
       align-items: center;
       justify-content: center;
       z-index: 99;
+      padding: 16px;
       backdrop-filter: blur(2px);
     }
     .modal-overlay.show { display: flex; }
     .modal-card {
       background: #fff;
       border-radius: 20px;
-      padding: 24px;
-      max-width: 440px;
-      width: 90%;
-      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+      padding: 20px;
+      width: 100%;
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2);
+      animation: modalPop 0.2s ease-out;
+    }
+    @keyframes modalPop {
+      from { transform: scale(0.95); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
     }
     .modal-card h3 {
       margin: 0 0 10px;
       color: #b91c1c;
-      font-size: 17px;
+      font-size: 16px;
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 6px;
     }
     .warning-box {
       background: #fef2f2;
       border: 1px solid #fecaca;
       border-radius: 10px;
-      padding: 12px;
-      font-size: 13px;
+      padding: 10px 12px;
+      font-size: 12.5px;
       color: #991b1b;
-      margin-bottom: 14px;
+      margin-bottom: 12px;
+      line-height: 1.45;
     }
   </style>
 </head>
@@ -389,12 +440,25 @@
     <button class="btn-scen" id="btn-normal" onclick="setScenario('normal')">
       ✅ Ca chuẩn: Đổi sang sáng mai 07:00
     </button>
+
+    <!-- Nút chuyển chế độ xem riêng màn hình app -->
+    <div style="margin-left: auto; display: flex; gap: 8px;">
+      <button class="btn-scen" id="btn-toggle-view" onclick="toggleViewMode()" style="background:#0f172a; color:#fff; font-weight:600;">
+        📱 Chế độ: Chỉ xem màn hình App
+      </button>
+    </div>
   </div>
 </header>
 
 <main>
-  <!-- KHUNG MÀN HÌNH ĐIỆN THOẠI -->
+  <!-- KHUNG MÀN HÌNH ĐIỆN THOẠI RIÊNG BIỆT -->
   <section class="phone">
+    <!-- In-App Notification Toast (thay cho alert của browser) -->
+    <div id="phone-toast" class="phone-toast">
+      <span id="toast-icon">✓</span>
+      <span id="toast-msg">Thông báo</span>
+    </div>
+
     <div class="bar">
       <span>Đặt chỗ Traveloka · TRV-7Q2K</span>
       <span id="current-clock">15:05</span>
@@ -411,6 +475,32 @@
     
     <div class="chat-scroll" id="chat-box">
       <!-- Nội dung tương tác sinh bởi JS -->
+    </div>
+
+    <!-- MODAL XÁC NHẬN HOÀN TIỀN 2 BƯỚC THIẾT KẾ NỘI BỘ TRONG APP -->
+    <div class="modal-overlay" id="refund-modal">
+      <div class="modal-card">
+        <h3>⚠️ Xác nhận gửi yêu cầu hoàn vé</h3>
+        <div class="warning-box">
+          <b>LƯU Ý CỰC KỲ QUAN TRỌNG:</b><br>
+          • Thao tác này <b>KHÔNG THỂ HỦY BỎ</b> sau khi gửi.<br>
+          • Mất quyền đổi chuyến miễn phí sang ngày mai.<br>
+          • Tiền hoàn về tài khoản trong <b>30 đến 90 ngày</b>.<br>
+          • Huỷ do bão: Hoàn 100% tiền vé, <b>không bồi thường tiền mặt</b>.
+        </div>
+        <div style="margin-bottom: 14px;">
+          <label style="display:flex; align-items:center; gap:8px; font-size:13px; cursor:pointer;">
+            <input type="checkbox" id="chk-commit" onchange="toggleRefundSubmit()">
+            Tôi đồng ý huỷ vé để nhận tiền hoàn sau.
+          </label>
+        </div>
+        <div style="display:flex; gap:8px; justify-content:flex-end;">
+          <button class="btn-sub" onclick="closeRefundModal()">Quay lại</button>
+          <button class="btn-main" id="btn-submit-refund" style="background:#dc2626; padding:8px 12px; font-size:13px;" disabled onclick="confirmRefund()">
+            Gửi yêu cầu hoàn tiền
+          </button>
+        </div>
+      </div>
     </div>
   </section>
 
@@ -516,37 +606,40 @@
   </aside>
 </main>
 
-<!-- MODAL XÁC NHẬN HOÀN TIỀN 2 BƯỚC (CẤM AI TỰ GỌI) -->
-<div class="modal-overlay" id="refund-modal">
-  <div class="modal-card">
-    <h3>⚠️ Xác nhận gửi yêu cầu hoàn vé vĩnh viễn</h3>
-    <div class="warning-box">
-      <b>LƯU Ý CỰC KỲ QUAN TRỌNG:</b><br>
-      • Thao tác này <b>KHÔNG THỂ HỦY BỎ</b> sau khi gửi.<br>
-      • Bạn sẽ mất quyền đổi chuyến miễn phí sang ngày mai.<br>
-      • Tiền hoàn sẽ về tài khoản thanh toán trong <b>30 đến 90 ngày</b>.<br>
-      • Huỷ do thời tiết: Hoàn 100% tiền vé, <b>không có bồi thường tiền mặt</b>.
-    </div>
-    <div style="margin-bottom: 16px;">
-      <label style="display:flex; align-items:center; gap:8px; font-size:13.5px; cursor:pointer;">
-        <input type="checkbox" id="chk-commit" onchange="toggleRefundSubmit()">
-        Tôi đã đọc kỹ và đồng ý huỷ vé để nhận tiền hoàn sau.
-      </label>
-    </div>
-    <div style="display:flex; gap:10px; justify-content:flex-end;">
-      <button class="btn-sub" onclick="closeRefundModal()">Quay lại (Đổi chuyến)</button>
-      <button class="btn-main" id="btn-submit-refund" style="background:#dc2626;" disabled onclick="confirmRefund()">
-        Gửi yêu cầu hoàn tiền
-      </button>
-    </div>
-  </div>
-</div>
-
 <script>
   let currentScenario = 'k2';
   let countdownSec = 20 * 60; // 20 phút
   let timerInterval = null;
   let isHoldCancelled = false;
+  let isMobileOnly = false;
+
+  function toggleViewMode() {
+    isMobileOnly = !isMobileOnly;
+    const btn = document.getElementById('btn-toggle-view');
+    if (isMobileOnly) {
+      document.body.classList.add('mobile-only');
+      btn.innerText = '📊 Chế độ: Kèm bảng Thuyết trình Rubric';
+      btn.style.background = '#0284c7';
+    } else {
+      document.body.classList.remove('mobile-only');
+      btn.innerText = '📱 Chế độ: Chỉ xem màn hình App';
+      btn.style.background = '#0f172a';
+    }
+  }
+
+  function showToast(msg, type = 'info') {
+    const toast = document.getElementById('phone-toast');
+    const msgEl = document.getElementById('toast-msg');
+    const iconEl = document.getElementById('toast-icon');
+    
+    toast.className = `phone-toast show ${type}`;
+    msgEl.innerText = msg;
+    iconEl.innerText = type === 'success' ? '✓' : (type === 'warning' ? '⚠️' : 'ℹ️');
+    
+    setTimeout(() => {
+      toast.classList.remove('show');
+    }, 3200);
+  }
 
   function startTimer() {
     if (timerInterval) clearInterval(timerInterval);
@@ -579,16 +672,54 @@
 
   function setScenario(scen) {
     currentScenario = scen;
-    document.querySelectorAll('.btn-scen').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.btn-scen').forEach(b => {
+      if (b.id !== 'btn-toggle-view') b.classList.remove('active');
+    });
     document.getElementById(`btn-${scen}`).classList.add('active');
     renderChat();
     startTimer();
   }
 
+  function getCardButtonsHTML(scen) {
+    if (scen === 'k2') {
+      return `
+        <button class="btn-main" onclick="confirmExchange('BM 201')">
+          <span class="n">4</span> Xác nhận đổi sang BM 201 (07:00) — Miễn phí
+        </button>
+        <button class="btn-danger-outline" onclick="openRefundModal()">
+          <span class="n">5</span> Tôi hiểu rủi ro, vẫn muốn Hoàn tiền
+        </button>
+        <button class="btn-sub" onclick="cancelHold()">
+          <span class="n">6</span> Huỷ giữ chỗ chuyến này
+        </button>
+      `;
+    } else if (scen === 'k1') {
+      return `
+        <button class="btn-main" onclick="confirmExchange('BM 201')">
+          <span class="n">4</span> Xác nhận đổi chuyến sáng mai 07:00 (Đủ 2 ghế)
+        </button>
+        <button class="btn-sub" onclick="confirmExchange('BM 205 (09:30)')">
+          Đổi sang chuyến 09:30 (BM 205, còn 4 chỗ)
+        </button>
+        <button class="btn-sub" onclick="callStaff()">
+          <span class="n">6</span> Bắt buộc đi tối nay? Chuyển gặp nhân viên
+        </button>
+      `;
+    } else {
+      return `
+        <button class="btn-main" onclick="confirmExchange('BM 201')">
+          <span class="n">4</span> Bấm duyệt đổi sang 07:00 ngay (1 chạm)
+        </button>
+        <button class="btn-sub" onclick="cancelHold()">
+          Huỷ yêu cầu
+        </button>
+      `;
+    }
+  }
+
   function renderChat() {
     const box = document.getElementById('chat-box');
     if (currentScenario === 'k2') {
-      // CA KHÓ 1 (K2): Đòi hoàn vé khi giận dữ
       box.innerHTML = `
         <div class="me">
           Bực mình quá, huỷ chuyến thế này thì hoàn tiền hết đi chứ bay gì nữa!
@@ -621,22 +752,13 @@
               ✓ Đã tạm giữ 2 ghế miễn phí trong 20 phút (Chưa mất lần đổi)
             </div>
 
-            <div class="btn-row">
-              <button class="btn-main" onclick="confirmExchange('BM 201')">
-                <span class="n">4</span> Xác nhận đổi sang BM 201 (07:00) — Miễn phí
-              </button>
-              <button class="btn-danger-outline" onclick="openRefundModal()">
-                <span class="n">5</span> Tôi hiểu rủi ro, vẫn muốn Hoàn tiền
-              </button>
-              <button class="btn-sub" onclick="cancelHold()">
-                <span class="n">6</span> Huỷ giữ chỗ chuyến này
-              </button>
+            <div class="btn-row" id="active-btn-row">
+              ${getCardButtonsHTML('k2')}
             </div>
           </div>
         </div>
       `;
     } else if (currentScenario === 'k1') {
-      // CA KHÓ 2 (K1): Đòi chuyến tối (BM 217 chỉ 1 chỗ cho 2 khách)
       box.innerHTML = `
         <div class="me">
           Chuyến bị huỷ rồi à? Đổi cho mình chuyến sớm nhất tối nay đi ngay nhé, mình gấp lắm rồi!
@@ -670,22 +792,13 @@
               Hà Nội (HAN) ➔ TP.HCM (SGN) · Còn 9 chỗ trống.
             </div>
 
-            <div class="btn-row">
-              <button class="btn-main" onclick="confirmExchange('BM 201')">
-                <span class="n">4</span> Xác nhận đổi chuyến sáng mai 07:00 (Đủ 2 ghế)
-              </button>
-              <button class="btn-sub" onclick="confirmExchange('BM 205 (09:30)')">
-                Đổi sang chuyến 09:30 (BM 205, còn 4 chỗ)
-              </button>
-              <button class="btn-sub" onclick="callStaff()">
-                <span class="n">6</span> Bắt buộc đi tối nay? Chuyển gặp nhân viên
-              </button>
+            <div class="btn-row" id="active-btn-row">
+              ${getCardButtonsHTML('k1')}
             </div>
           </div>
         </div>
       `;
     } else {
-      // CA BÌNH THƯỜNG
       box.innerHTML = `
         <div class="me">
           Đổi giúp mình sang chuyến sáng mai 07:00 nhé.
@@ -711,13 +824,8 @@
               Hạng Phổ thông Tiết kiệm · 2 khách · Miễn phí đổi 1 lần do bão.
             </div>
 
-            <div class="btn-row">
-              <button class="btn-main" onclick="confirmExchange('BM 201')">
-                <span class="n">4</span> Bấm duyệt đổi sang 07:00 ngay (1 chạm)
-              </button>
-              <button class="btn-sub" onclick="cancelHold()">
-                Huỷ yêu cầu
-              </button>
+            <div class="btn-row" id="active-btn-row">
+              ${getCardButtonsHTML('normal')}
             </div>
           </div>
         </div>
@@ -725,20 +833,43 @@
     }
   }
 
+  function lockActions(actionType, detail = '') {
+    const btnRow = document.getElementById('active-btn-row');
+    const card = document.querySelector('#chat-box .flight-card');
+    
+    if (btnRow) {
+      if (actionType === 'exchange') {
+        btnRow.innerHTML = `<div style="padding:10px 12px; background:#dcfce7; color:#15803d; border-radius:10px; font-weight:700; font-size:13px; text-align:center;">✓ ĐÃ XÁC NHẬN ĐỔI SANG ${detail}</div>`;
+        if (card) { card.style.borderColor = '#10b981'; card.style.background = '#f0fdf4'; }
+      } else if (actionType === 'cancel_hold') {
+        btnRow.innerHTML = `<div style="padding:10px 12px; background:#f1f5f9; color:#64748b; border-radius:10px; font-weight:600; font-size:13px; text-align:center;">✗ ĐÃ HUỶ GIỮ CHỖ (Vé đã nhả)</div>`;
+        if (card) { card.style.borderColor = '#cbd5e1'; card.style.background = '#f8fafc'; card.style.opacity = '0.75'; }
+      } else if (actionType === 'refund') {
+        btnRow.innerHTML = `<div style="padding:10px 12px; background:#fee2e2; color:#b91c1c; border-radius:10px; font-weight:700; font-size:13px; text-align:center;">✗ ĐÃ GỬI YÊU CẦU HOÀN TIỀN (Không thể đảo ngược)</div>`;
+        if (card) { card.style.borderColor = '#ef4444'; card.style.background = '#fef2f2'; card.style.opacity = '0.75'; }
+      } else if (actionType === 'staff') {
+        btnRow.innerHTML = `<div style="padding:10px 12px; background:#eff6ff; color:#1d4ed8; border-radius:10px; font-weight:600; font-size:13px; text-align:center;">📞 ĐÃ CHUYỂN GẶP TỔNG ĐÀI VIÊN HỖ TRỢ</div>`;
+        if (card) { card.style.borderColor = '#3b82f6'; card.style.background = '#eff6ff'; }
+      }
+    }
+  }
+
   function confirmExchange(flightName) {
+    lockActions('exchange', flightName);
+    showToast(`Đã đổi vé thành công sang ${flightName}!`, 'success');
     const box = document.getElementById('chat-box');
     box.innerHTML += `
-      <div class="ai" style="background:#ecfdf5; border-color:#a7f3d0; margin-top:8px;">
+      <div class="ai" style="background:#ecfdf5; border-color:#a7f3d0; margin-top:8px;" id="block-exchange-result">
         <div style="color:#047857; font-weight:700; margin-bottom:4px;">
-          ✓ ĐỔI VÉ THÀNH CÔNG SANG ${flightName}!
+          ✓ ĐÃ ĐỔI VÉ THÀNH CÔNG SANG ${flightName}!
         </div>
         <div style="font-size:13px; color:#065f46;">
           • Mã vé mới: <b>TRV-7Q2K-NEW</b>.<br>
           • Đã sử dụng 1 lần đổi miễn phí do bão.<br>
           • Vé điện tử đã gửi về email của chị Nguyễn Minh An.
         </div>
-        <div style="margin-top:8px;">
-          <button class="btn-sub" style="font-size:12px; padding:4px 10px;" onclick="undoExchange()">
+        <div style="margin-top:8px;" id="undo-container">
+          <button class="btn-sub" id="btn-undo-action" style="font-size:12px; padding:6px 12px; font-weight:600;" onclick="undoExchange()">
             ↺ Hoàn tác đổi vé trong 5 phút (Nếu bấm nhầm)
           </button>
         </div>
@@ -748,17 +879,60 @@
   }
 
   function undoExchange() {
-    alert("Hệ thống đã kích hoạt quy trình hoàn tác! Giữ lại trạng thái vé cũ và chuyển kết nối tổng đài viên hỗ trợ trong 30 giây.");
-    renderChat();
+    showToast("Đã kích hoạt hoàn tác đổi vé!", "warning");
+    
+    // 1. Biến nút Hoàn tác thành badge đã hoàn tác (không cho bấm lần 2)
+    const undoContainer = document.getElementById('undo-container');
+    if (undoContainer) {
+      undoContainer.innerHTML = `<span style="display:inline-block; padding:4px 8px; background:#fef3c7; color:#b45309; border-radius:6px; font-size:12px; font-weight:700;">✓ ĐÃ GỬI YÊU CẦU HOÀN TÁC THÀNH CÔNG</span>`;
+    }
+
+    // 2. Khôi phục lại thẻ giữ chỗ ban đầu cho người dùng chọn lại
+    const btnRow = document.getElementById('active-btn-row');
+    if (btnRow) {
+      btnRow.innerHTML = getCardButtonsHTML(currentScenario);
+    }
+    const card = document.querySelector('#chat-box .flight-card');
+    if (card) {
+      card.style.borderColor = '#10b981';
+      card.style.background = '#f0fdf4';
+      card.style.opacity = '1';
+    }
+
+    // 3. Đẩy thông báo hướng dẫn chọn lại
+    const box = document.getElementById('chat-box');
+    box.innerHTML += `
+      <div class="ai" style="background:#fffbeb; border-color:#fde68a; margin-top:8px;">
+        <div style="color:#b45309; font-weight:700; margin-bottom:4px;">
+          ↺ ĐÃ THU HỒI VÉ ĐỔI
+        </div>
+        <div style="font-size:13px; color:#78350f;">
+          Vé đổi mới đã được thu hồi. Chỗ tạm giữ cũ đã được khôi phục. <b>Bạn có thể chọn lại phương án trên thẻ chuyến bay bên trên</b>.
+        </div>
+      </div>
+    `;
+    box.scrollTop = box.scrollHeight;
   }
 
   function cancelHold() {
     isHoldCancelled = true;
     updateTimerDisplay();
-    alert("Đã huỷ giữ chỗ! 2 ghế trên chuyến bay đã được hoàn trả lại cho hệ thống.");
+    lockActions('cancel_hold');
+    showToast("Đã huỷ giữ chỗ! 2 ghế trên chuyến bay đã được hoàn trả lại cho hệ thống.", "info");
+    const box = document.getElementById('chat-box');
+    box.innerHTML += `
+      <div class="ai" style="background:#f1f5f9; border-color:#cbd5e1; margin-top:8px;">
+        <div style="color:#475569; font-weight:600; font-size:13px;">
+          ℹ️ Bạn đã huỷ giữ chỗ chuyến BM 201. Vé đã được trả lại kho vé chung.
+        </div>
+      </div>
+    `;
+    box.scrollTop = box.scrollHeight;
   }
 
   function callStaff() {
+    lockActions('staff');
+    showToast("Đang kết nối tổng đài viên hỗ trợ khẩn cấp...", "info");
     const box = document.getElementById('chat-box');
     box.innerHTML += `
       <div class="ai" style="background:#f1f5f9; border-color:#cbd5e1; margin-top:8px;">
@@ -789,6 +963,8 @@
 
   function confirmRefund() {
     closeRefundModal();
+    lockActions('refund');
+    showToast("Đã gửi yêu cầu hoàn vé sang hãng hàng không thành công!", "success");
     const box = document.getElementById('chat-box');
     box.innerHTML += `
       <div class="ai" style="background:#fef2f2; border-color:#fecaca; margin-top:8px;">
@@ -811,4 +987,3 @@
 </script>
 </body>
 </html>
-
