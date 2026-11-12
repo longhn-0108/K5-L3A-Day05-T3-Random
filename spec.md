@@ -5,7 +5,7 @@
 |---|---|---|
 | Lê Anh Sơn | 2A202603440 | Phân tích 8 kịch bản rủi ro (§2), thiết kế mức tự chủ 5 tools (§4)|
 | Thành viên 2 | (Điền MSSV) | Thiết kế UX/UI khi AI sai (§3), câu chữ nguyên văn, chỉ dẫn HAX/PAIR trên Prototype |
-| Thành viên 3 | (Điền MSSV) | Dựng interactive Prototype (§5), viết tiêu chí nghiệm thu (§6), kịch bản test ca lạ (§7) |
+| Nguyễn Quang Duy | 2A202603462 | Dựng interactive Prototype (§5), viết tiêu chí nghiệm thu (§6), kịch bản test ca lạ (§7) |
 
 ---
 
@@ -142,6 +142,7 @@
 ### 1. Ca demo chính (Khách yêu cầu mơ hồ kèm rủi ro thiếu ghế):
 * Khách nhắn: *"Chuyến bị huỷ rồi à? Đổi gấp cho mình chuyến sớm nhất đi!"*
 * Demo cho thấy: AI không chọn chuyến tối 21:00 (vì chỉ còn 1 chỗ), tự động giữ chỗ chuyến 07:00 sáng mai (còn 9 chỗ), bật đồng hồ đếm ngược 20 phút và yêu cầu khách xác nhận. Khách bấm đổi thành công trong 1 chạm.
+
 
 ### 2. Kế hoạch ứng phó các Ca lạ từ Giám khảo / TA:
 * **Ca lạ 1: Khách yêu cầu bồi thường tiền mặt do lỡ cuộc họp quan trọng:**
